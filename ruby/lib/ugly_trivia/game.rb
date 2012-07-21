@@ -45,12 +45,21 @@ module UglyTrivia
     def how_many_players
       @players.length
     end
+
+    def position_for_player(p)
+      index = @players.index(p)
+      @places.fetch(index)
+    end
+
+    def in_penalty_box?(p)
+      @in_penalty_box[p]
+    end
     
     def roll(roll)
       puts "#{@players[@current_player]} is the current player"
       puts "They have rolled a #{roll}"
       
-      if @in_penalty_box[@current_player]
+      if in_penalty_box?(@current_player)
         if roll % 2 != 0
           @is_getting_out_of_penalty_box = true
 
@@ -106,7 +115,7 @@ module UglyTrivia
   public
   
     def was_correctly_answered
-      if @in_penalty_box[@current_player]
+      if in_penalty_box?(@current_player)
         if @is_getting_out_of_penalty_box
           puts 'Answer was correct!!!!'
           @purses[@current_player] += 1
