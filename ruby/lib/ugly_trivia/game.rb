@@ -36,7 +36,7 @@ module UglyTrivia
       @purses[how_many_players] = 0
       @in_penalty_box[how_many_players] = false
       
-      puts player_name + " was added"
+      puts "#{player_name} was added"
       puts "They are player number #{@players.length}"
       
       true
