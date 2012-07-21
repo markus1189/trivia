@@ -25,8 +25,8 @@ module UglyTrivia
     def create_rock_question(index)
       "Rock Question #{index}"
     end
-    
-    def is_playable?
+
+    def playable?
       how_many_players >= 2
     end
     
@@ -52,8 +52,8 @@ module UglyTrivia
       
       if @in_penalty_box[@current_player]
         if roll % 2 != 0
-          is_getting_out_of_penalty_box = true
-          
+          @is_getting_out_of_penalty_box = true
+
           puts "#{@players[@current_player]} is getting out of the penalty box"
           @places[@current_player] = @places[@current_player] + roll
           @places[@current_player] = @places[@current_player] - 12 if @places[@current_player] > 11
@@ -65,14 +65,14 @@ module UglyTrivia
           ask_question
         else
           puts "#{@players[@current_player]} is not getting out of the penalty box"
-          is_getting_out_of_penalty_box = false
+          @is_getting_out_of_penalty_box = false
           end
-          
+
       else
-        
+
         @places[@current_player] = @places[@current_player] + roll
         @places[@current_player] = @places[@current_player] - 12 if @places[@current_player] > 11
-        
+
         puts @players[@current_player] +
               '\'s new location is' +
               @places[@current_player].to_s
