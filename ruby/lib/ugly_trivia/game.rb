@@ -6,7 +6,6 @@ module UglyTrivia
     def  initialize
       @players = []
       @places = Array.new(6, 0)
-      @purses = Array.new(6, 0)
       @in_penalty_box = Array.new(6) { false }
 
       @pop_questions = []
@@ -42,7 +41,6 @@ module UglyTrivia
     def add(player)
       @players.push player
       @places[how_many_players] = 0
-      @purses[how_many_players] = 0
 
       @moderator.added_player(player,how_many_players)
       true
@@ -59,7 +57,7 @@ module UglyTrivia
 
     def coins_for(p)
       index = @players.index(p)
-      @purses.fetch(index)
+      p.coins
     end
 
     def in_penalty_box?(p)
@@ -143,13 +141,12 @@ module UglyTrivia
     def was_correctly_answered
       if in_penalty_box?(current_player)
         if @is_getting_out_of_penalty_box
-          @moderator.correct_answer(current_player,
-                                    @purses[@current_player_index])
+          @moderator.correct_answer(current_player)
 
-          @purses[@current_player_index] += 1
+          current_player.add_coin
 
           winner = did_player_win()
-          @current_player_index += 1
+          @current_player_index = 1
           @current_player_index = 0 if @current_player_index == @players.length
 
           winner
@@ -161,12 +158,9 @@ module UglyTrivia
 
       else
 
-        @moderator.correct_answer(
-          current_player,
-          @purses[@current_player_index]
-        )
+        @moderator.correct_answer(current_player)
 
-        @purses[@current_player_index] += 1
+        current_player.add_coin
 
         winner = did_player_win
         @current_player_index += 1
@@ -188,7 +182,7 @@ module UglyTrivia
   private
 
     def did_player_win
-      !(@purses[@current_player_index] == 6)
+      !(current_player.coins == 6)
     end
   end
 

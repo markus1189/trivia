@@ -1,8 +1,8 @@
 require "spec_helper"
 require "ugly_trivia/game"
 describe UglyTrivia::Game do
-  let (:p1) { "Bob" }
-  let (:p2) { "Alice" }
+  let (:p1) { UglyTrivia::Player.new("Bob") }
+  let (:p2) { UglyTrivia::Player.new("Alice") }
 
   context "starting a new game" do
     let (:game) { UglyTrivia::Game.new }

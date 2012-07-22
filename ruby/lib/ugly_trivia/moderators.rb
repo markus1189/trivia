@@ -15,9 +15,9 @@ module UglyTrivia
   		puts "#{player} was sent to the penalty box"
     end
 
-    def correct_answer(player,coins)
+    def correct_answer(player)
       puts 'Answer was correct!'
-      puts "#{player} now has #{coins} Gold coins."
+      puts "#{player} now has #{player.coins} Gold coins."
     end
 
     def moved_player(player,location,category)
