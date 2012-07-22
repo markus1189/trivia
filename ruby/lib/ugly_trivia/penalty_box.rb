@@ -19,7 +19,7 @@ module UglyTrivia
     end
 
     def gets_out?(player,roll)
-      !penalty?(player) or roll.even?
+      !penalty?(player) or roll.odd?
     end
   end
 end

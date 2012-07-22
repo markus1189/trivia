@@ -7,30 +7,29 @@ module UglyTrivia
   PlayerNotFoundError = Class.new(StandardError)
   UnknownCategoryError = Class.new(StandardError)
   class Game
-    attr_reader :cup, :board, :moderator
+    attr_reader :cup, :board, :moderator, :penalty_box
 
-      def  initialize(opts={})
+    def  initialize(opts={})
+      @players = []
+      @moderator = opts.fetch(:moderator) { GameModerator.silent }
+      @board = opts.fetch(:board) { Board.new(6) }
+      @cup = opts.fetch(:cup) { Cup.new(2) }
+      @penalty_box = opts.fetch(:penalty_box) { PenaltyBox.new }
 
-        @players = []
-        @moderator = opts.fetch(:moderator) { GameModerator.new }
-        @board = opts.fetch(:board) { Board.new(6) }
-        @cup = opts.fetch(:cup) { Cup.new(2) }
-        @penalty_box = opts.fetch(:penalty_box) { PenaltyBox.new }
+      @pop_questions = []
+      @science_questions = []
+      @sports_questions = []
+      @rock_questions = []
 
-        @pop_questions = []
-        @science_questions = []
-        @sports_questions = []
-        @rock_questions = []
+      @is_getting_out_of_penalty_box = false
 
-        @is_getting_out_of_penalty_box = false
-
-        50.times do |i|
-          @pop_questions.push "Pop Question #{i}"
-          @science_questions.push "Science Question #{i}"
-          @sports_questions.push "Sports Question #{i}"
-          @rock_questions.push create_rock_question(i)
-        end
+      50.times do |i|
+        @pop_questions.push "Pop Question #{i}"
+        @science_questions.push "Science Question #{i}"
+        @sports_questions.push "Sports Question #{i}"
+        @rock_questions.push create_rock_question(i)
       end
+    end
 
     def create_rock_question(index)
       "Rock Question #{index}"
@@ -70,7 +69,7 @@ module UglyTrivia
     end
 
     def current_player_gets_out?
-      @is_getting_out_of_penalty_box
+      @penalty_box.gets_out?(current_player,@cup.face_sum)
     end
 
     def roll
@@ -81,17 +80,16 @@ module UglyTrivia
       @moderator.rolled(current_player,roll)
 
       if in_penalty_box?(current_player)
-        if roll % 2 != 0
-          @is_getting_out_of_penalty_box = true
-
+        if current_player_gets_out?
+          @penalty_box.remove(current_player)
           @moderator.player_gets_out_of_penalty_box(current_player)
-          @board.move_player(current_player,roll)
 
+          @board.move_player(current_player,roll)
           @moderator.moved_player(current_player,current_category)
+
           ask_question
         else
           @moderator.player_stays_in_penalty_box(current_player)
-          @is_getting_out_of_penalty_box = false
         end
 
       else
@@ -110,7 +108,7 @@ module UglyTrivia
 
     def was_correctly_answered
       if in_penalty_box?(current_player)
-        if @is_getting_out_of_penalty_box
+        if current_player_gets_out?
           @moderator.correct_answer(current_player)
 
           current_player.add_coin

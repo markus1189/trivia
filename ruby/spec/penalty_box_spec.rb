@@ -20,5 +20,19 @@ describe UglyTrivia::PenaltyBox do
   it "should fail if the players has not been in penalty" do
     expect { box.remove(stub) }.to raise_error(UglyTrivia::PlayerNotInPenalty)
   end
+
+  it "a player gets out if he is in the box and the roll is odd" do
+    player = stub
+    box.add(player)
+
+    box.gets_out?(player, 3).should be_true
+  end
+
+  it "a player stays in the box if the roll is even" do
+    player = stub
+    box.add(player)
+
+    box.gets_out?(player, 2).should be_false
+  end
 end
 

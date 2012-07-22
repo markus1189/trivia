@@ -67,38 +67,6 @@ describe UglyTrivia::Game do
           game.roll
         }.to change {game.position_for_player(p1)}.by(5)
       end
-
-      context "while in penalty box" do
-        context "and the roll is odd" do
-          it "then the player is getting out of the penalty box" do
-            # Get player 1 into penalty box
-            player = game.current_player
-            game.wrong_answer
-            game.in_penalty_box?(player).should be_true
-
-            # Cycle through player 2
-            game.roll
-            game.was_correctly_answered
-
-            game.cup.should_receive(:face_sum).and_return(1)
-            game.roll
-            game.current_player_gets_out?.should be_true
-          end
-        end
-        context "and the roll is even" do
-          it "then the player remains in the penalty box" do
-            # Get player 1 into penalty box
-            player = game.current_player
-            game.wrong_answer
-            game.in_penalty_box?(player).should be_true
-
-            expect {
-              game.roll
-            }.not_to change { game.position_for_player(player) }
-            game.in_penalty_box?(player).should be_true
-          end
-        end
-      end
     end
 
     context "answering a question correctly" do
@@ -112,21 +80,12 @@ describe UglyTrivia::Game do
       end
 
       context "while in penalty box" do
-
         context "and the last roll was odd (coming out)" do
 
           it "adds a coin to the player's purse" do
-            # Get player 1 into penalty box
             player = game.current_player
-            game.wrong_answer
-            game.in_penalty_box?(player).should be_true
-
-            # Cycle through player 2
-            game.roll
-            game.was_correctly_answered
-
-            game.cup.should_receive(:face_sum).and_return(1)
-            game.roll
+            game.penalty_box.should_receive(:penalty?).with(player).and_return(true)
+            game.should_receive(:current_player_gets_out?).and_return(true)
             expect {
               game.was_correctly_answered
             }.to change { player.coins }.by(1)
@@ -134,18 +93,8 @@ describe UglyTrivia::Game do
         end
 
         context "last roll was even (staying inside)" do
-          it "does not add a coint" do
-            # Get player 1 into penalty box
+          it "does not add a coin" do
             player = game.current_player
-            game.wrong_answer
-            game.in_penalty_box?(player).should be_true
-
-            # Cycle through player 2
-            game.roll
-            game.was_correctly_answered
-
-            game.cup.should_receive(:face_sum).and_return(2)
-            game.roll
             expect {
               game.wrong_answer
             }.not_to change { player.coins }
