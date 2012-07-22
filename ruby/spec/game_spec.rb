@@ -39,18 +39,16 @@ describe UglyTrivia::Game do
   context "playing a game" do
     let(:game) { UglyTrivia::Game.new.tap {|g| g.add(p1); g.add(p2) } }
 
-    context "changes the current player after" do
-      it "a correct answer" do
-        expect {
-          game.was_correctly_answered
-        }.to change { game.current_player }.from(p1).to(p2)
-      end
+    it "changes the current player after a correct answer" do
+      expect {
+        game.was_correctly_answered
+      }.to change { game.current_player }.from(p1).to(p2)
+    end
 
-      it "a wrong answer" do
-        expect {
-          game.wrong_answer
-        }.to change { game.current_player }.from(p1).to(p2)
-      end
+    it "changes the current player after a wrong answer" do
+      expect {
+        game.wrong_answer
+      }.to change { game.current_player }.from(p1).to(p2)
     end
 
     it "puts a player into the penalty box if answer is wrong" do
@@ -94,6 +92,50 @@ describe UglyTrivia::Game do
               game.roll(2)
             }.not_to change { game.position_for_player(player) }
             game.in_penalty_box?(player).should be_true
+          end
+        end
+      end
+    end
+
+    context "answering a question correctly" do
+      context "outside the penalty box" do
+        it "adds a coin to the player's purse"
+      end
+
+      context "while in penalty box" do
+
+        context "and the last roll was odd (coming out)" do
+
+          it "adds a coin to the player's purse" do
+            # Get player 1 into penalty box
+            player = game.current_player
+            game.wrong_answer
+            game.in_penalty_box?(player).should be_true
+
+            # Cycle through player 2
+            game.roll(1)
+            game.was_correctly_answered
+            game.roll(3)
+            expect {
+              game.was_correctly_answered
+            }.to change { game.coins_for(player) }.by(1)
+          end
+        end
+
+        context "last roll was even (staying inside)" do
+          it "does not add a coint" do
+            # Get player 1 into penalty box
+            player = game.current_player
+            game.wrong_answer
+            game.in_penalty_box?(player).should be_true
+
+            # Cycle through player 2
+            game.roll(1)
+            game.was_correctly_answered
+            game.roll(3)
+            expect {
+              game.wrong_answer
+            }.not_to change { game.coins_for(player) }
           end
         end
       end

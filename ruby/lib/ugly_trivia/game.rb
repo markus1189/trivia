@@ -57,6 +57,11 @@ module UglyTrivia
       @places.fetch(index)
     end
 
+    def coins_for(p)
+      index = @players.index(p)
+      @purses.fetch(index)
+    end
+
     def in_penalty_box?(p)
       index = @players.index(p)
       index or raise PlayerNotFoundError
@@ -153,8 +158,6 @@ module UglyTrivia
           @current_player_index = 0 if @current_player_index == @players.length
           true
         end
-
-
 
       else
 
