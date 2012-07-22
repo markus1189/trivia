@@ -118,7 +118,7 @@ describe UglyTrivia::Game do
             game.roll(3)
             expect {
               game.was_correctly_answered
-            }.to change { game.coins_for(player) }.by(1)
+            }.to change { player.coins }.by(1)
           end
         end
 
@@ -135,7 +135,7 @@ describe UglyTrivia::Game do
             game.roll(3)
             expect {
               game.wrong_answer
-            }.not_to change { game.coins_for(player) }
+            }.not_to change { player.coins }
           end
         end
       end

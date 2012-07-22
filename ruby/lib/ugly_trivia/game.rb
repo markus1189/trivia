@@ -1,11 +1,15 @@
 require_relative "moderators"
+require_relative "board"
 module UglyTrivia
   PlayerNotFoundError = Class.new(StandardError)
   UnknownCategoryError = Class.new(StandardError)
   class Game
-    def  initialize
+    def  initialize(moderator=GameModerator.silent)
+      @moderator = moderator
+
+      @board = Board.new(6)
+
       @players = []
-      @places = Array.new(6, 0)
       @in_penalty_box = Array.new(6) { false }
 
       @pop_questions = []
@@ -15,8 +19,6 @@ module UglyTrivia
 
       @current_player_index = 0
       @is_getting_out_of_penalty_box = false
-
-      @moderator = GameModerator.silent
 
       50.times do |i|
         @pop_questions.push "Pop Question #{i}"
@@ -39,8 +41,8 @@ module UglyTrivia
     end
 
     def add(player)
-      @players.push player
-      @places[how_many_players] = 0
+      player.move_to(0)
+      @players << player
 
       @moderator.added_player(player,how_many_players)
       true
@@ -51,8 +53,7 @@ module UglyTrivia
     end
 
     def position_for_player(p)
-      index = @players.index(p)
-      @places.fetch(index)
+      p.position
     end
 
     def coins_for(p)
@@ -79,8 +80,7 @@ module UglyTrivia
           @is_getting_out_of_penalty_box = true
 
           @moderator.player_gets_out_of_penalty_box(current_player)
-          @places[@current_player_index] = @places[@current_player_index] + roll
-          @places[@current_player_index] = @places[@current_player_index] - 12 if @places[@current_player_index] > 11
+          @board.move_player(current_player,roll)
 
           @moderator.moved_player(current_player,
                                   position_for_player(current_player),
@@ -93,8 +93,7 @@ module UglyTrivia
 
       else
 
-        @places[@current_player_index] = @places[@current_player_index] + roll
-        @places[@current_player_index] = @places[@current_player_index] - 12 if @places[@current_player_index] > 11
+        @board.move_player(current_player,roll)
 
         @moderator.moved_player(current_player,
                                 position_for_player(current_player),
@@ -112,7 +111,7 @@ module UglyTrivia
                    @pop_questions.shift
                  when 'Science'
                    @science_questions.shift
-                 when 'Sports'
+                 when 'Sport'
                    @sports_questions.shift
                  when 'Rock'
                    @rock_questions.shift
@@ -124,16 +123,7 @@ module UglyTrivia
     end
 
     def current_category
-      return 'Pop' if @places[@current_player_index] == 0
-      return 'Pop' if @places[@current_player_index] == 4
-      return 'Pop' if @places[@current_player_index] == 8
-      return 'Science' if @places[@current_player_index] == 1
-      return 'Science' if @places[@current_player_index] == 5
-      return 'Science' if @places[@current_player_index] == 9
-      return 'Sports' if @places[@current_player_index] == 2
-      return 'Sports' if @places[@current_player_index] == 6
-      return 'Sports' if @places[@current_player_index] == 10
-      return 'Rock'
+      @board[current_player.position].category
     end
 
   public

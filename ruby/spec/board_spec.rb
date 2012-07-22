@@ -1,6 +1,19 @@
 require "spec_helper"
 require "ugly_trivia/board.rb"
 
+describe UglyTrivia::Field do
+  it "knows its category" do
+    sp = UglyTrivia::Field.sport
+    sc = UglyTrivia::Field.science
+    r = UglyTrivia::Field.rock
+    p = UglyTrivia::Field.pop
+
+    sp.should be_sport
+    sc.should be_science
+    r.should be_rock
+    p.should be_pop
+  end
+end
 describe UglyTrivia::Board do
   let(:board) { UglyTrivia::Board.new(6) }
 
@@ -27,7 +40,11 @@ describe UglyTrivia::Board do
 
   it "has different fields" do
     expected = ['Pop','Science','Sports','Rock']
-    (0...4).map { |i| board[i] }.map(&:category).should eq(expected)
+    (0...4).map { |i| board[i] }.map(&:category).uniq.size.should eq(4)
+  end
+
+  it "the first field is a pop field" do
+    board[0].should be_pop
   end
 end
 

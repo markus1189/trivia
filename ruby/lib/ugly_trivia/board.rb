@@ -2,9 +2,22 @@ module UglyTrivia
   class Field
     attr_reader :category
 
+    %w[Pop Sport Rock Science].each do |category|
+      define_method("#{category.downcase}?") do          # def sport?
+        self.category == category                        #   self.category == 'Sport'
+      end                                                # end
+
+      define_singleton_method("#{category.downcase}") do # def self.sport
+        new(category)                                    #   new('Sport')
+      end                                                # end
+    end
+
+    private
+
     def initialize(category)
       @category = category
     end
+
   end
 
   class Board
@@ -15,7 +28,7 @@ module UglyTrivia
         elsif (n % 4) == 1
           create_science_field
         elsif (n % 4) == 2
-          create_sports_field
+          create_sport_field
         elsif (n % 4) == 3
           create_rock_field
         else
@@ -32,8 +45,8 @@ module UglyTrivia
       Field.new('Science')
     end
 
-    def create_sports_field
-      Field.new('Sports')
+    def create_sport_field
+      Field.new('Sport')
     end
 
     def create_rock_field
