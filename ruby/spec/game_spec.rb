@@ -1,5 +1,7 @@
 require "spec_helper"
 require "ugly_trivia/game"
+require "ugly_trivia/player"
+
 describe UglyTrivia::Game do
   let (:p1) { UglyTrivia::Player.new("Bob") }
   let (:p2) { UglyTrivia::Player.new("Alice") }
@@ -60,8 +62,9 @@ describe UglyTrivia::Game do
 
     context "rolling the die" do
       it "moves the current player after roll if not in penalty box" do
+        game.cup.should_receive(:face_sum).and_return(5)
         expect {
-          game.roll(5)
+          game.roll
         }.to change {game.position_for_player(p1)}.by(5)
       end
 
@@ -74,10 +77,11 @@ describe UglyTrivia::Game do
             game.in_penalty_box?(player).should be_true
 
             # Cycle through player 2
-            game.roll(1)
+            game.roll
             game.was_correctly_answered
 
-            game.roll(3)
+            game.cup.should_receive(:face_sum).and_return(1)
+            game.roll
             game.current_player_gets_out?.should be_true
           end
         end
@@ -89,7 +93,7 @@ describe UglyTrivia::Game do
             game.in_penalty_box?(player).should be_true
 
             expect {
-              game.roll(2)
+              game.roll
             }.not_to change { game.position_for_player(player) }
             game.in_penalty_box?(player).should be_true
           end
@@ -99,7 +103,12 @@ describe UglyTrivia::Game do
 
     context "answering a question correctly" do
       context "outside the penalty box" do
-        it "adds a coin to the player's purse"
+        it "adds a coin to the player's purse" do
+          player = game.current_player
+          expect {
+            game.was_correctly_answered
+          }.to change { player.coins }.by(1)
+        end
       end
 
       context "while in penalty box" do
@@ -113,9 +122,11 @@ describe UglyTrivia::Game do
             game.in_penalty_box?(player).should be_true
 
             # Cycle through player 2
-            game.roll(1)
+            game.roll
             game.was_correctly_answered
-            game.roll(3)
+
+            game.cup.should_receive(:face_sum).and_return(1)
+            game.roll
             expect {
               game.was_correctly_answered
             }.to change { player.coins }.by(1)
@@ -130,9 +141,11 @@ describe UglyTrivia::Game do
             game.in_penalty_box?(player).should be_true
 
             # Cycle through player 2
-            game.roll(1)
+            game.roll
             game.was_correctly_answered
-            game.roll(3)
+
+            game.cup.should_receive(:face_sum).and_return(2)
+            game.roll
             expect {
               game.wrong_answer
             }.not_to change { player.coins }

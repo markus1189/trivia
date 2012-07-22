@@ -1,15 +1,24 @@
 require_relative "moderators"
 require_relative "board"
+require_relative "cup"
+
 module UglyTrivia
   PlayerNotFoundError = Class.new(StandardError)
   UnknownCategoryError = Class.new(StandardError)
   class Game
-    def  initialize(moderator=GameModerator.silent)
-      @moderator = moderator
+    attr_reader :cup, :board, :moderator
 
-      @board = Board.new(6)
+    def  initialize(opts={
+      :moderator => GameModerator.silent,
+      :board => Board.new(6),
+      :cup => Cup.new(2)
+    })
 
       @players = []
+      @moderator = opts.fetch(:moderator) { GameModerator.silent }
+      @board = opts.fetch(:board) { Board.new(6) }
+      @cup = opts.fetch(:cup)
+
       @in_penalty_box = Array.new(6) { false }
 
       @pop_questions = []
@@ -71,7 +80,10 @@ module UglyTrivia
       @is_getting_out_of_penalty_box
     end
 
-    def roll(roll)
+    def roll
+      @cup.roll
+      roll = @cup.face_sum
+
       @moderator.current_player(current_player)
       @moderator.rolled(current_player,roll)
 
