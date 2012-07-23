@@ -9,59 +9,53 @@ module UglyTrivia
   class Game
     attr_reader :cup, :board, :moderator, :penalty_box
 
-    def  initialize(opts={})
-      @players = []
-      @moderator = opts.fetch(:moderator) { GameModerator.silent }
-      @board = opts.fetch(:board) { Board.new(6) }
-      @cup = opts.fetch(:cup) { Cup.new(2) }
+    def initialize(opts={})
+      @players     = []
+      @moderator   = opts.fetch(:moderator)   { GameModerator.silent }
+      @board       = opts.fetch(:board)       { Board.new(6) }
+      @cup         = opts.fetch(:cup)         { Cup.new(2) }
       @penalty_box = opts.fetch(:penalty_box) { PenaltyBox.new }
 
+      create_card_deck
+    end
+
+    def create_card_deck
       @pop_questions = []
       @science_questions = []
       @sports_questions = []
       @rock_questions = []
 
-      @is_getting_out_of_penalty_box = false
-
       50.times do |i|
         @pop_questions.push "Pop Question #{i}"
         @science_questions.push "Science Question #{i}"
-        @sports_questions.push "Sports Question #{i}"
-        @rock_questions.push create_rock_question(i)
+        @sports_questions.push "Sport Question #{i}"
+        @rock_questions.push "Rock Question #{i}"
       end
-    end
-
-    def create_rock_question(index)
-      "Rock Question #{index}"
     end
 
     def current_player
       @players.first
     end
 
+    def num_players
+      @players.size
+    end
+
     def playable?
-      how_many_players >= 2
+      num_players >= 2
     end
 
     def add(player)
       player.move_to(0)
       @players << player
 
-      @moderator.added_player(player,how_many_players)
-      true
+      @moderator.added_player(player,num_players)
+
+      self
     end
 
-    def how_many_players
-      @players.length
-    end
-
-    def position_for_player(p)
-      p.position
-    end
-
-    def coins_for(p)
-      index = @players.index(p)
-      p.coins
+    def next_player
+      @players.rotate!
     end
 
     def in_penalty_box?(p)
@@ -102,37 +96,17 @@ module UglyTrivia
       end
     end
 
-    def next_player
-      @players.rotate!
+    def was_correctly_answered
+      correct_answer
     end
 
-    def was_correctly_answered
-      if in_penalty_box?(current_player)
-        if current_player_gets_out?
-          @moderator.correct_answer(current_player)
-
-          current_player.add_coin
-
-          winner = did_player_win()
-          next_player
-
-          winner
-        else
-          next_player
-          true
-        end
-
-      else
-
+    def correct_answer
+      unless in_penalty_box?(current_player) && !current_player_gets_out?
         @moderator.correct_answer(current_player)
-
         current_player.add_coin
-
-        winner = did_player_win
-        next_player
-
-        return winner
       end
+
+      next_player
     end
 
     def wrong_answer
@@ -140,7 +114,6 @@ module UglyTrivia
       @penalty_box.add(current_player)
 
       next_player
-      return true
     end
 
     private

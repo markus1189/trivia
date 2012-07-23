@@ -17,12 +17,12 @@ describe UglyTrivia::Game do
     end
 
     it "knows how many players it has" do
-      game.how_many_players.should eq(0)
+      game.num_players.should eq(0)
 
       expect {
         game.add(p1)
         game.add(p2)
-      }.to change { game.how_many_players }.by(2)
+      }.to change { game.num_players }.by(2)
     end
 
     it "can not be started if not playable" do
@@ -65,7 +65,7 @@ describe UglyTrivia::Game do
         game.cup.should_receive(:face_sum).and_return(5)
         expect {
           game.roll
-        }.to change {game.position_for_player(p1)}.by(5)
+        }.to change {p1.position}.by(5)
       end
     end
 
