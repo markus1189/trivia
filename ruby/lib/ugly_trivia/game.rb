@@ -45,6 +45,14 @@ module UglyTrivia
       num_players >= 2
     end
 
+    def finished?
+      @players.any? { |p| p.coins >= 6 }
+    end
+
+    def winner
+      finished? and @players.max_by(&:coins)
+    end
+
     def add(player)
       player.move_to(0)
       @players << player
@@ -102,8 +110,8 @@ module UglyTrivia
 
     def correct_answer
       unless in_penalty_box?(current_player) && !current_player_gets_out?
-        @moderator.correct_answer(current_player)
         current_player.add_coin
+        @moderator.correct_answer(current_player)
       end
 
       next_player

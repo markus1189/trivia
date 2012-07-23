@@ -2,25 +2,23 @@
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 
 require 'ugly_trivia/game'
+require 'ugly_trivia/player'
+require 'ugly_trivia/moderators'
 
-not_a_winner = false
+game = UglyTrivia::Game.new(:moderator => UglyTrivia::GameModerator.new)
 
-game = UglyTrivia::Game.new
+game.add UglyTrivia::Player.new('Chet')
+game.add UglyTrivia::Player.new('Pat')
+game.add UglyTrivia::Player.new('Sue')
 
-game.add 'Chet'
-game.add 'Pat'
-game.add 'Sue'
+until game.finished?
+  game.roll
 
-begin
-  
-  game.roll(rand(5) + 1)
-  
   if rand(9) == 7
-    not_a_winner = game.wrong_answer
+    game.wrong_answer
   else
-    not_a_winner = game.was_correctly_answered
+    game.correct_answer
   end
-  
-  
-  
-end while not_a_winner
+end
+
+puts "The winner is: #{game.winner.name} with #{game.winner.coins} coins."
